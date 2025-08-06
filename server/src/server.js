@@ -1,26 +1,35 @@
 import express from 'express'
-import mongoose from 'mongoose'
-import cors from 'cors'
-import morgan from 'morgan'
 import dotenv from 'dotenv'
+import morgan from 'morgan'
+import cors from 'cors'
+import connectDB from './config/db.js'
 
 dotenv.config()
 
 const app = express()
 
+// Middleware
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
 
+// Root route
 app.get('/', (req, res) => {
-  res.send('Student Attendance API running...')
+  res.send('🎓 Student Attendance API is live.')
 })
 
+// Connect to DB and start server
 const PORT = process.env.PORT || 5000
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-}).then(() => {
-  console.log('MongoDB connected')
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
-}).catch(err => console.error(err))
+connectDB()
+
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`)
+})
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('🛑 Shutting down gracefully...')
+  server.close(() => {
+    process.exit(0)
+  })
+})
