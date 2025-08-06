@@ -1,0 +1,47 @@
+// models/User.js
+
+import mongoose from 'mongoose'
+const { Schema } = mongoose;
+
+const userSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    enum: ['admin', 'teacher', 'student', 'parent'],
+    default: 'student'
+  },
+  phone: {
+    type: String,
+    trim: true
+  },
+  department: {
+    type: String,
+    trim: true
+  },
+  studentId: {
+    type: String,
+    trim: true
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, { timestamps: true }); // adds createdAt & updatedAt automatically
+
+const User = mongoose.model('User', userSchema)
+export default User
