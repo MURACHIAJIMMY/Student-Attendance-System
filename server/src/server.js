@@ -4,6 +4,8 @@ import morgan from 'morgan'
 import cors from 'cors'
 import connectDB from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
+import userRoutes from './routes/userRoutes.js'
+
 
 dotenv.config()
 
@@ -14,7 +16,7 @@ app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
 app.use('/api/auth', authRoutes)
-
+app.use('/api/users', userRoutes)
 // Root route
 app.get('/', (req, res) => {
   res.send('🎓 Student Attendance API is live.')
