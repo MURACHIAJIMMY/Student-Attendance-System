@@ -12,6 +12,10 @@ export const markAttendance = async (req, res) => {
   try {
     const { studentId, classId, date, status, reason, excused } = req.body
 
+    // 🔒 Basic input validation
+    if (!studentId || !classId || !date || !status) {
+      return res.status(400).json({ error: 'Missing required fields: studentId, classId, date, and status are mandatory.' })
+    }
     const record = await Attendance.create({
       student: studentId,
       class: classId,
@@ -19,7 +23,10 @@ export const markAttendance = async (req, res) => {
       status,
       reason,
       excused,
-      markedBy: req.user._id
+        markedBy: {
+    _id: req.user._id,
+    name: req.user.name
+  }
     })
 
     if (status === 'absent' && !excused) {
@@ -48,7 +55,10 @@ export const markAttendance = async (req, res) => {
       date,
       status,
       excused,
-      markedBy: req.user._id
+        markedBy: {
+    _id: req.user._id,
+    name: req.user.name
+  }
     })
 
     res.status(201).json({ message: 'Attendance recorded', record })
@@ -80,23 +90,27 @@ export const markBiometricAttendance = async (req, res) => {
       return res.status(409).json({ error: 'Attendance already marked for this student' })
     }
 
-    const record = await Attendance.create({
-      student: student._id,
-      class: classId,
-      date: attendanceDate,
-      status: 'present',
-      markedBy: req.user?._id || null,
-      source: 'biometric'
-    })
+   const record = await Attendance.create({
+  student: student._id,
+  class: classId,
+  date: attendanceDate,
+  status: 'present',
+  markedBy: req.user
+    ? { _id: req.user._id, name: req.user.name }
+    : { _id: null, name: 'System' },
+  source: 'biometric'
+})
 
-    req.io.emit('attendance:marked', {
-      studentId: student._id,
-      classId,
-      date: attendanceDate,
-      status: 'present',
-      markedBy: req.user?._id || null,
-      source: 'biometric'
-    })
+req.io.emit('attendance:marked', {
+  studentId: student._id,
+  classId,
+  date: attendanceDate,
+  status: 'present',
+  markedBy: req.user
+    ? { _id: req.user._id, name: req.user.name }
+    : { _id: null, name: 'System' },
+  source: 'biometric'
+})
 
     res.status(201).json({ message: 'Biometric attendance recorded', record })
   } catch (err) {
@@ -113,49 +127,54 @@ export const markBatchAttendance = async (req, res) => {
     const { classId, date, records } = req.body
     const results = []
 
-    for (const record of records) {
-      const { studentId, status, reason, excused } = record
+   for (const record of records) {
+  const { studentId, status, reason, excused } = record
 
-      const attendance = await Attendance.create({
-        student: studentId,
-        class: classId,
-        date,
-        status,
-        reason,
-        excused,
-        markedBy: req.user._id
-      })
-
-      if (status === 'absent' && !excused) {
-        const student = await User.findById(studentId)
-
-        if (student) {
-          await NotificationService.send({
-            recipient: student._id,
-            type: 'absence',
-            message: `You missed class on ${new Date(date).toDateString()}.`,
-            deliveryMethod: 'email',
-            metadata: {
-              attendanceId: attendance._id,
-              date,
-              classId,
-              reason,
-              excused
-            }
-          })
-        }
-      }
-
-      results.push(attendance)
+  const attendance = await Attendance.create({
+    student: studentId,
+    class: classId,
+    date,
+    status,
+    reason,
+    excused,
+    markedBy: {
+      _id: req.user._id,
+      name: req.user.name
     }
+  })
 
-    req.io.emit('attendance:batchMarked', {
-      classId,
-      date,
-      count: results.length,
-      markedBy: req.user._id
-    })
+  if (status === 'absent' && !excused) {
+    const student = await User.findById(studentId)
 
+    if (student) {
+      await NotificationService.send({
+        recipient: student._id,
+        type: 'absence',
+        message: `You missed class on ${new Date(date).toDateString()}.`,
+        deliveryMethod: 'email',
+        metadata: {
+          attendanceId: attendance._id,
+          date,
+          classId,
+          reason,
+          excused
+        }
+      })
+    }
+  }
+
+  results.push(attendance)
+}
+
+req.io.emit('attendance:batchMarked', {
+  classId,
+  date,
+  count: results.length,
+  markedBy: {
+    _id: req.user._id,
+    name: req.user.name
+  }
+})
     res.status(201).json({ message: 'Batch attendance recorded', records: results })
   } catch (err) {
     console.error('[markBatchAttendance]', err)

@@ -5,11 +5,16 @@ import User from '../models/User.js'
 
 const generateToken = (user) => {
   return jwt.sign(
-    { id: user._id, role: user.role },
+    {
+      id: user._id,
+      name: user.name,      // 👈 Add this
+      role: user.role
+    },
     process.env.JWT_SECRET,
     { expiresIn: '7d' }
   )
 }
+
 
 // @route   POST /api/auth/signup
 export const signup = async (req, res) => {
