@@ -4,20 +4,14 @@ import mongoose from "mongoose";
 const attendanceSchema = new mongoose.Schema(
   {
     student: {
-      _id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
-      },
-      name: { type: String, required: true },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     class: {
-      _id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Class",
-        required: true,
-      },
-      name: { type: String, required: true },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Class",
+      required: true,
     },
     date: { type: Date, required: true },
     status: {
