@@ -13,7 +13,7 @@ import attendanceRoutes from './routes/attendanceRoutes.js'
 import reminderRoutes from './routes/reminderRoutes.js'
 import classRoutes from './routes/classRoutes.js'
 import { sendAttendanceReminders } from './cronJobs/attendanceReminder.js'
-
+import classStudentRoutes from './routes/classStudentRoutes.js'
 dotenv.config()
 connectDB()
 
@@ -43,7 +43,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/attendance', attendanceRoutes)
 app.use('/api/reminders', reminderRoutes)
 app.use('/api/classes', classRoutes)
-
+app.use('/api/classes/:classId/students', classStudentRoutes)
 // Root route
 app.get('/', (req, res) => {
   res.send('🎓 Student Attendance API is live.')
