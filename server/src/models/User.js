@@ -37,6 +37,11 @@ const userSchema = new Schema({
     type: String,
     trim: true
   },
+  fingerprintHash: {
+  type: String,
+  unique: true,
+  sparse: true // allows nulls without violating uniqueness
+},
   isActive: {
     type: Boolean,
     default: true
