@@ -8,11 +8,16 @@ import { updateStatsCache } from "../utils/statsCache.js";
  * Resolve studentId from admNo if needed
  */
 const resolveStudentId = async ({ studentId, admNo }) => {
-  if (studentId) return studentId;
+  if (studentId) {
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      throw new Error("Invalid studentId format.");
+    }
+    return studentId;
+  }
 
   if (!admNo) throw new Error("Either studentId or admNo must be provided.");
 
-  const student = await User.findOne({ admNo }).select("_id");
+  const student = await User.findOne({ admNo, role: "student" }).select("_id");
   if (!student) throw new Error(`No student found with admNo: ${admNo}`);
 
   return student._id;
@@ -57,14 +62,12 @@ export const markAttendance = async (req, res) => {
 
     // Basic validation
     if (!classId || !date || !status) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Missing required fields: classId, date, and status are mandatory.",
-        });
+      return res.status(400).json({
+        error: "Missing required fields: classId, date, and status are mandatory.",
+      });
     }
 
+    // Resolve student ID from either studentId or admNo
     const resolvedStudentId = await resolveStudentId({ studentId, admNo });
     const attendanceDate = new Date(date);
 
@@ -76,11 +79,9 @@ export const markAttendance = async (req, res) => {
     });
 
     if (existing) {
-      return res
-        .status(409)
-        .json({
-          error: "Attendance already marked for this student on this date.",
-        });
+      return res.status(409).json({
+        error: "Attendance already marked for this student on this date.",
+      });
     }
 
     // Create attendance record
@@ -127,16 +128,18 @@ export const markAttendance = async (req, res) => {
       .populate("student", "name admNo")
       .populate("class", "name");
 
-    res
-      .status(201)
-      .json({ message: "Attendance recorded", record: populatedRecord });
+    res.status(201).json({
+      message: "Attendance recorded",
+      record: populatedRecord,
+    });
   } catch (err) {
     console.error("[markAttendance]", err);
-    res
-      .status(500)
-      .json({ error: err.message || "Server error while marking attendance" });
+    res.status(500).json({
+      error: err.message || "Server error while marking attendance",
+    });
   }
 };
+
 // mark attendance using biometric data
 export const markBiometricAttendance = async (req, res) => {
   try {
