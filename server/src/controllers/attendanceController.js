@@ -1,5 +1,6 @@
 import Attendance from "../models/Attendance.js";
 import User from "../models/User.js";
+import mongoose from "mongoose";
 import { NotificationService } from "../services/NotificationService.js";
 import { Parser } from "json2csv";
 import AttendanceTrend from "../models/AttendanceTrend.js";
@@ -7,6 +8,7 @@ import { updateStatsCache } from "../utils/statsCache.js";
 /**
  * Resolve studentId from admNo if needed
  */
+
 const resolveStudentId = async ({ studentId, admNo }) => {
   if (studentId) {
     if (!mongoose.Types.ObjectId.isValid(studentId)) {
