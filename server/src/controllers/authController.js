@@ -16,38 +16,46 @@ const generateToken = (user) => {
   )
 }
 
-// @route   POST /api/auth/signup
 export const signup = async (req, res) => {
   try {
-    const { name, email, password, role, admNo } = req.body
+    const { name, email, password, role, admNo, className, gender, phone } = req.body;
 
     // Check for existing email
-    const existingEmail = await User.findOne({ email })
-    if (existingEmail) return res.status(400).json({ error: 'Email already in use' })
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) return res.status(400).json({ error: 'Email already in use' });
 
-    // Check for existing admNo if role is student
+    // Student-specific validations
     if (role === 'student') {
-      if (!admNo) return res.status(400).json({ error: 'Admission number is required for students' })
-      const existingAdmNo = await User.findOne({ admNo })
-      if (existingAdmNo) return res.status(400).json({ error: 'Admission number already in use' })
+      if (!admNo || !className || !gender) {
+        return res.status(400).json({ error: 'admNo, className, and gender are required for students' });
+      }
+
+      const existingAdmNo = await User.findOne({ admNo });
+      if (existingAdmNo) return res.status(400).json({ error: 'Admission number already in use' });
+
+      const validGenders = ['male', 'female'];
+      if (!validGenders.includes(gender)) {
+        return res.status(400).json({ error: 'Invalid gender value' });
+      }
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     const newUser = await User.create({
       name,
       email,
       password: hashedPassword,
       role,
-      ...(role === 'student' && { admNo }) // Only include admNo for students
-    })
+      phone,
+      ...(role === 'student' && { admNo, className, gender })
+    });
 
-    const token = generateToken(newUser)
-    res.status(201).json({ user: newUser, token })
+    const token = generateToken(newUser);
+    res.status(201).json({ user: newUser, token });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-}
+};
 
 // @route   POST /api/auth/login
 export const login = async (req, res) => {

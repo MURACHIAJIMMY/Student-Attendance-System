@@ -1,5 +1,3 @@
-// models/User.js
-
 import mongoose from 'mongoose'
 const { Schema } = mongoose;
 
@@ -9,15 +7,15 @@ const userSchema = new Schema({
     required: true,
     trim: true
   },
-admNo: {
-  type: String,
-  required: function () {
-    return this.role === 'student';
+  admNo: {
+    type: String,
+    required: function () {
+      return this.role === 'student';
+    },
+    trim: true,
+    unique: true,
+    sparse: true
   },
-  trim: true,
-  unique: true,
-  sparse: true // allows nulls for non-students
-},
   email: {
     type: String,
     required: true,
@@ -42,17 +40,30 @@ admNo: {
     type: String,
     trim: true
   },
-
   fingerprintHash: {
-  type: String,
-  unique: true,
-  sparse: true // allows nulls without violating uniqueness
-},
+    type: String,
+    unique: true,
+    sparse: true
+  },
+  className: {
+    type: String,
+    trim: true,
+    required: function () {
+      return this.role === 'student';
+    }
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+    required: function () {
+      return this.role === 'student';
+    }
+  },
   isActive: {
     type: Boolean,
     default: true
   }
-}, { timestamps: true }); // adds createdAt & updatedAt automatically
+}, { timestamps: true })
 
 const User = mongoose.model('User', userSchema)
 export default User

@@ -9,7 +9,7 @@ import { protect, authorizeRoles } from '../middleware/authMiddleware.js'
 const router = express.Router({ mergeParams: true })
 
 // Add students to a class by ID
-router.post('/:classId/students', protect, authorizeRoles('admin', 'teacher'), addStudentsToClass)
+router.put('/:classId/students', protect, authorizeRoles('admin', 'teacher'), addStudentsToClass)
 
 // Remove a student from a class
 router.delete('/:classId/students/:studentId', protect, authorizeRoles('admin', 'teacher'), removeStudentFromClass)
