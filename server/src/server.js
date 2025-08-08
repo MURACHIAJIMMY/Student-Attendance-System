@@ -43,7 +43,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/attendance', attendanceRoutes)
 app.use('/api/reminders', reminderRoutes)
 app.use('/api/classes', classRoutes)
-app.use('/api/classes/:classId/students', classStudentRoutes)
+app.use('/api/classes', classStudentRoutes)
 // Root route
 app.get('/', (req, res) => {
   res.send('🎓 Student Attendance API is live.')
