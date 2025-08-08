@@ -24,6 +24,25 @@ const resolveStudentId = async ({ studentId, admNo }) => {
 };
 
 /**
+ * Resolve classId from className if needed
+ */
+const resolveClassId = async ({ classId, className }) => {
+  if (classId) {
+    if (!mongoose.Types.ObjectId.isValid(classId)) {
+      throw new Error("Invalid classId format.");
+    }
+    return classId;
+  }
+
+  if (!className) throw new Error("Either classId or className must be provided.");
+
+  const classDoc = await Class.findOne({ name: className }).select("_id");
+  if (!classDoc) throw new Error(`No class found with name: ${className}`);
+
+  return classDoc._id;
+};
+
+/**
  * Notify student of unexcused absence
  */
 const notifyAbsence = async ({
@@ -57,24 +76,33 @@ const notifyAbsence = async ({
  */
 export const markAttendance = async (req, res) => {
   try {
-    const { studentId, admNo, classId, date, status, reason, excused } =
-      req.body;
+    const {
+      studentId,
+      admNo,
+      classId,
+      className,
+      date,
+      status,
+      reason,
+      excused,
+    } = req.body;
 
     // Basic validation
-    if (!classId || !date || !status) {
+    if (!date || !status) {
       return res.status(400).json({
-        error: "Missing required fields: classId, date, and status are mandatory.",
+        error: "Missing required fields: date and status are mandatory.",
       });
     }
 
-    // Resolve student ID from either studentId or admNo
+    // Resolve student and class IDs
     const resolvedStudentId = await resolveStudentId({ studentId, admNo });
+    const resolvedClassId = await resolveClassId({ classId, className });
     const attendanceDate = new Date(date);
 
     // Prevent duplicate attendance
     const existing = await Attendance.findOne({
       student: resolvedStudentId,
-      class: classId,
+      class: resolvedClassId,
       date: attendanceDate,
     });
 
@@ -87,7 +115,7 @@ export const markAttendance = async (req, res) => {
     // Create attendance record
     const record = await Attendance.create({
       student: resolvedStudentId,
-      class: classId,
+      class: resolvedClassId,
       date: attendanceDate,
       status,
       reason,
@@ -103,7 +131,7 @@ export const markAttendance = async (req, res) => {
       await notifyAbsence({
         studentId: resolvedStudentId,
         attendanceDate,
-        classId,
+        classId: resolvedClassId,
         reason,
         excused,
         recordId: record._id,
@@ -113,7 +141,7 @@ export const markAttendance = async (req, res) => {
     // Emit real-time update
     req.io.emit("attendance:marked", {
       studentId: resolvedStudentId,
-      classId,
+      classId: resolvedClassId,
       date: attendanceDate,
       status,
       excused,
@@ -139,6 +167,7 @@ export const markAttendance = async (req, res) => {
     });
   }
 };
+
 
 // mark attendance using biometric data
 export const markBiometricAttendance = async (req, res) => {
