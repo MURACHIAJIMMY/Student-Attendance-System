@@ -11,25 +11,27 @@ import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// Get students by class ID or name
 router.get(
-  "/:id/students",
+  "/:idOrName/students",
   protect,
   authorizeRoles("teacher"),
   getStudentsByClass
 );
+
 // Create a class (admin or teacher)
 router.post("/", protect, authorizeRoles("admin", "teacher"), createClass);
 
-// Update a class
+// Update a class (strict ID only)
 router.put("/:id", protect, authorizeRoles("admin", "teacher"), updateClass);
 
-// Delete a class
+// Delete a class (strict ID only)
 router.delete("/:id", protect, authorizeRoles("admin"), deleteClass);
 
-// Get single class
-router.get("/:id", protect, authorizeRoles("admin", "teacher"), getClassById);
+// Get single class by ID or name
+router.get("/:idOrName", protect, authorizeRoles("admin", "teacher"), getClassById);
 
-// Get all classes
+// Get all classes (with optional filters)
 router.get("/", protect, authorizeRoles("admin", "teacher"), getAllClasses);
 
 export default router;

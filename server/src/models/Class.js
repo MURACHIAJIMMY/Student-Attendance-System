@@ -5,10 +5,15 @@ const classSchema = new mongoose.Schema({
   teacher: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   students: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   schedule: [{
-    day: { type: String, required: true }, // e.g., 'Monday'
-    startTime: { type: String },           // e.g., '08:30'
-    endTime: { type: String }              // e.g., '10:30'
-  }]
+  day: {
+    type: String,
+    required: true,
+    enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+  },
+  startTime: { type: String },
+  endTime: { type: String }
+}]
+
 }, { timestamps: true })
 
 const Class = mongoose.model('Class', classSchema)

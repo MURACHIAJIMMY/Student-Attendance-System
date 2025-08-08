@@ -1,34 +1,40 @@
+import mongoose from 'mongoose'
 import Class from '../models/Class.js'
 import User from '../models/User.js'
 import asyncHandler from 'express-async-handler'
-export const getStudentsByClass = async (req, res) => {
-  try {
-    const classId = req.params.id
-    const classDoc = await Class.findById(classId).populate('students', '-password') // exclude sensitive data
 
-    if (!classDoc) {
-      return res.status(404).json({ error: 'Class not found' })
-    }
+// @desc    Get students by class ID or name
+// @route   GET /api/classes/:idOrName/students
+// @access  Admin or Teacher
+export const getStudentsByClass = asyncHandler(async (req, res) => {
+  const { idOrName } = req.params
 
-    res.json(classDoc.students)
-  } catch (err) {
-    res.status(500).json({ error: 'Server error', details: err.message })
+  const query = mongoose.Types.ObjectId.isValid(idOrName)
+    ? { _id: idOrName }
+    : { name: { $regex: new RegExp(idOrName, 'i') } }
+
+  const classDoc = await Class.findOne(query).populate('students', 'name admNo')
+
+  if (!classDoc) {
+    res.status(404)
+    throw new Error('Class not found')
   }
-}
+
+  res.json(classDoc.students)
+})
+
 // @desc    Create a new class
 // @route   POST /api/classes
 // @access  Admin or Teacher
 export const createClass = asyncHandler(async (req, res) => {
   const { name, teacher, students, schedule } = req.body
 
-  // Validate teacher
   const teacherExists = await User.findOne({ _id: teacher, role: 'teacher' })
   if (!teacherExists) {
     res.status(400)
     throw new Error('Invalid teacher ID or role')
   }
 
-  // Validate students
   const validStudents = await User.find({ _id: { $in: students }, role: 'student' })
   if (validStudents.length !== students.length) {
     res.status(400)
@@ -88,14 +94,19 @@ export const deleteClass = asyncHandler(async (req, res) => {
   res.json({ message: 'Class deleted successfully' })
 })
 
-// @desc    Get a single class
-// @route   GET /api/classes/:id
+// @desc    Get a single class by ID or name
+// @route   GET /api/classes/:idOrName
 // @access  Admin or Teacher
 export const getClassById = asyncHandler(async (req, res) => {
-  const classId = req.params.id
-  const classData = await Class.findById(classId)
+  const { idOrName } = req.params
+
+  const query = mongoose.Types.ObjectId.isValid(idOrName)
+    ? { _id: idOrName }
+    : { name: { $regex: new RegExp(idOrName, 'i') } }
+
+  const classData = await Class.findOne(query)
     .populate('teacher', 'name email role')
-    .populate('students', 'name email role')
+    .populate('students', 'name admNo')
 
   if (!classData) {
     res.status(404)
@@ -105,13 +116,20 @@ export const getClassById = asyncHandler(async (req, res) => {
   res.json(classData)
 })
 
-// @desc    Get all classes
+// @desc    Get all classes (optional filters)
 // @route   GET /api/classes
 // @access  Admin or Teacher
 export const getAllClasses = asyncHandler(async (req, res) => {
-  const classes = await Class.find()
+  const { name, teacher } = req.query
+
+  const query = {
+    ...(name && { name: { $regex: new RegExp(name, 'i') } }),
+    ...(teacher && { teacher })
+  }
+
+  const classes = await Class.find(query)
     .populate('teacher', 'name email role')
-    .populate('students', 'name email role')
+    .populate('students', 'name admNo')
 
   res.json(classes)
 })

@@ -3,6 +3,7 @@ import {
   markAttendance,
   markBiometricAttendance ,
   markBatchAttendance,
+  generateClassTrends,
   getStudentAttendance,
   getClassAttendance,
   updateAttendance,
@@ -11,6 +12,7 @@ import {
   exportClassAttendance,
   getClassThresholdViolations,
   getClassTrends
+
 } from '../controllers/attendanceController.js'
 import { protect, authorizeRoles } from '../middleware/authMiddleware.js'
 import { analyticsHook } from '../middleware/analyticsHook.js'
@@ -23,6 +25,8 @@ router.post('/mark', protect, authorizeRoles('teacher'), markAttendance, analyti
 router.post('/biometric', markBiometricAttendance)
 // ✅ Mark batch attendance with analytics
 router.post('/mark-batch', protect, authorizeRoles('teacher'), markBatchAttendance, analyticsHook)
+// 📊 Generate class trends for analytics
+router.post('/class/:id/trends/generate', protect, authorizeRoles('teacher','admin'), generateClassTrends)
 
 // 🔧 Update attendance record
 router.put('/:id', protect, authorizeRoles('teacher', 'admin'), updateAttendance)

@@ -9,6 +9,15 @@ const userSchema = new Schema({
     required: true,
     trim: true
   },
+admNo: {
+  type: String,
+  required: function () {
+    return this.role === 'student';
+  },
+  trim: true,
+  unique: true,
+  sparse: true // allows nulls for non-students
+},
   email: {
     type: String,
     required: true,
@@ -33,10 +42,7 @@ const userSchema = new Schema({
     type: String,
     trim: true
   },
-  studentId: {
-    type: String,
-    trim: true
-  },
+
   fingerprintHash: {
   type: String,
   unique: true,
