@@ -27,23 +27,36 @@ export const getStudentsByClass = asyncHandler(async (req, res) => {
 // @route   POST /api/classes
 // @access  Admin or Teacher
 export const createClass = asyncHandler(async (req, res) => {
-  const { name, teacher, students, schedule } = req.body
+  const { name, teacher, students = [], schedule } = req.body
 
+  // Validate teacher
   const teacherExists = await User.findOne({ _id: teacher, role: 'teacher' })
   if (!teacherExists) {
     res.status(400)
     throw new Error('Invalid teacher ID or role')
   }
 
-  const validStudents = await User.find({ _id: { $in: students }, role: 'student' })
-  if (validStudents.length !== students.length) {
-    res.status(400)
-    throw new Error('One or more student IDs are invalid or not students')
+  // Validate students if provided
+  let validStudents = []
+  if (students.length > 0) {
+    validStudents = await User.find({ _id: { $in: students }, role: 'student' })
+    if (validStudents.length !== students.length) {
+      res.status(400)
+      throw new Error('One or more student IDs are invalid or not students')
+    }
   }
 
-  const newClass = await Class.create({ name, teacher, students, schedule })
+  // Create class
+  const newClass = await Class.create({
+    name,
+    teacher,
+    students: validStudents.map(s => s._id),
+    schedule
+  })
+
   res.status(201).json(newClass)
 })
+
 
 // @desc    Update class details
 // @route   PUT /api/classes/:id
