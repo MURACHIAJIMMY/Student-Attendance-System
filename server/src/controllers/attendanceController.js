@@ -169,20 +169,26 @@ export const markAttendance = async (req, res) => {
     });
   }
 };
-
 // mark attendance using biometric data
 export const markBiometricAttendance = async (req, res) => {
   try {
     const { fingerprintHash, classId, date, initialize } = req.body;
-    const attendanceDate = date ? new Date(date) : new Date();
-    attendanceDate.setHours(0, 0, 0, 0); // Normalize to midnight
 
+    // Normalize date to midnight
+    const attendanceDate = date ? new Date(date) : new Date();
+    attendanceDate.setHours(0, 0, 0, 0);
+
+    // Validate required fields
     if (!fingerprintHash || !classId) {
-      return res.status(400).json({ error: 'Missing required fields: fingerprintHash and classId are mandatory.' });
+      return res.status(400).json({
+        error: 'Missing required fields: fingerprintHash and classId are mandatory.'
+      });
     }
 
     if (typeof fingerprintHash !== 'string' || fingerprintHash.length < 16) {
-      return res.status(400).json({ error: 'Invalid fingerprint hash format.' });
+      return res.status(400).json({
+        error: 'Invalid fingerprint hash format.'
+      });
     }
 
     // Optional: initialize attendance for all students as 'absent'
@@ -190,7 +196,11 @@ export const markBiometricAttendance = async (req, res) => {
       const students = await User.find({ class: classId });
       const bulkOps = students.map(student => ({
         updateOne: {
-          filter: { student: student._id, class: classId, date: attendanceDate },
+          filter: {
+            student: student._id,
+            class: classId,
+            date: attendanceDate
+          },
           update: {
             $setOnInsert: {
               status: 'absent',
@@ -206,11 +216,15 @@ export const markBiometricAttendance = async (req, res) => {
       }
     }
 
+    // Match student by fingerprint
     const student = await User.findOne({ fingerprintHash });
     if (!student) {
-      return res.status(404).json({ error: 'Fingerprint not recognized' });
+      return res.status(404).json({
+        error: 'Fingerprint not recognized'
+      });
     }
 
+    // Check for existing attendance
     const existing = await Attendance.findOne({
       student: student._id,
       class: classId,
@@ -218,19 +232,28 @@ export const markBiometricAttendance = async (req, res) => {
     });
 
     if (existing && existing.status === 'present') {
-      return res.status(409).json({ error: 'Attendance already marked as present for this student' });
+      return res.status(409).json({
+        error: 'Attendance already marked as present for this student'
+      });
     }
 
-    const markedBy = req.user
-      ? { _id: req.user._id, name: req.user.name }
-      : { _id: null, name: 'Biometric System' };
+    // Auto-fill markedBy from student
+    const markedBy = {
+      _id: student._id,
+      name: student.name
+    };
 
+    // Create or update attendance record
     const record = existing
-      ? await Attendance.findByIdAndUpdate(existing._id, {
-          status: 'present',
-          markedBy,
-          source: 'biometric'
-        }, { new: true })
+      ? await Attendance.findByIdAndUpdate(
+          existing._id,
+          {
+            status: 'present',
+            markedBy,
+            source: 'biometric'
+          },
+          { new: true }
+        )
       : await Attendance.create({
           student: student._id,
           class: classId,
@@ -240,6 +263,7 @@ export const markBiometricAttendance = async (req, res) => {
           source: 'biometric'
         });
 
+    // Emit real-time update
     req.io.emit('attendance:marked', {
       studentId: student._id,
       studentName: student.name,
@@ -251,17 +275,22 @@ export const markBiometricAttendance = async (req, res) => {
       source: 'biometric'
     });
 
+    // Populate response
     const populatedRecord = await Attendance.findById(record._id)
       .populate('student', 'name admNo')
       .populate('class', 'name');
 
-    res.status(201).json({ message: 'Biometric attendance recorded', record: populatedRecord });
+    res.status(201).json({
+      message: 'Biometric attendance recorded',
+      record: populatedRecord
+    });
   } catch (err) {
     console.error('[markBiometricAttendance]', err);
-    res.status(500).json({ error: err.message || 'Failed to record biometric attendance' });
+    res.status(500).json({
+      error: err.message || 'Failed to record biometric attendance'
+    });
   }
 };
-
 
 
 // mark batch attendance
