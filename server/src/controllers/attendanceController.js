@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import { NotificationService } from "../services/NotificationService.js";
 import { Parser } from "json2csv";
 import AttendanceTrend from "../models/AttendanceTrend.js";
+import BiometricLog from '../models/BiometricLog.js';
+import { matchFingerprintToStudent } from '../utils/fingerprintUtils.js';
 import { updateStatsCache } from "../utils/statsCache.js";
 /**
  * Resolve studentId from admNo if needed
@@ -169,6 +171,7 @@ export const markAttendance = async (req, res) => {
     });
   }
 };
+
 // mark attendance using biometric data
 export const markBiometricAttendance = async (req, res) => {
   try {
@@ -216,8 +219,17 @@ export const markBiometricAttendance = async (req, res) => {
       }
     }
 
-    // Match student by fingerprint
-    const student = await User.findOne({ fingerprintHash });
+    // Match student using utility
+    const student = await matchFingerprintToStudent(fingerprintHash);
+
+    // Log biometric attempt
+    await BiometricLog.create({
+      fingerprintHash,
+      classId,
+      matchedStudent: student?._id || null,
+      success: !!student
+    });
+
     if (!student) {
       return res.status(404).json({
         error: 'Fingerprint not recognized'

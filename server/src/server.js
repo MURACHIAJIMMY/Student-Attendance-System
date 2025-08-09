@@ -9,11 +9,14 @@ import { Server } from 'socket.io'
 import connectDB from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
+import biometricRoutes from './routes/biometricRoutes.js'
 import attendanceRoutes from './routes/attendanceRoutes.js'
 import reminderRoutes from './routes/reminderRoutes.js'
 import classRoutes from './routes/classRoutes.js'
 import { sendAttendanceReminders } from './cronJobs/attendanceReminder.js'
 import classStudentRoutes from './routes/classStudentRoutes.js'
+
+
 dotenv.config()
 connectDB()
 
@@ -40,6 +43,7 @@ app.use(morgan('dev'))
 app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/biometric', biometricRoutes)
 app.use('/api/attendance', attendanceRoutes)
 app.use('/api/reminders', reminderRoutes)
 app.use('/api/classes', classRoutes)
