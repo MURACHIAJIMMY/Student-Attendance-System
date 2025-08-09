@@ -15,14 +15,25 @@ const generateToken = (user) => {
     { expiresIn: '7d' }
   )
 }
-
 export const signup = async (req, res) => {
   try {
-    const { name, email, password, role, admNo, className, gender, phone } = req.body;
+    const {
+      name,
+      email,
+      password,
+      role,
+      admNo,
+      className,
+      gender,
+      phone,
+      fingerprintHash
+    } = req.body;
 
     // Check for existing email
     const existingEmail = await User.findOne({ email });
-    if (existingEmail) return res.status(400).json({ error: 'Email already in use' });
+    if (existingEmail) {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
 
     // Student-specific validations
     if (role === 'student') {
@@ -31,12 +42,19 @@ export const signup = async (req, res) => {
       }
 
       const existingAdmNo = await User.findOne({ admNo });
-      if (existingAdmNo) return res.status(400).json({ error: 'Admission number already in use' });
+      if (existingAdmNo) {
+        return res.status(400).json({ error: 'Admission number already in use' });
+      }
 
       const validGenders = ['male', 'female'];
       if (!validGenders.includes(gender)) {
         return res.status(400).json({ error: 'Invalid gender value' });
       }
+    }
+
+    // Fingerprint validation (optional but recommended)
+    if (fingerprintHash && (typeof fingerprintHash !== 'string' || fingerprintHash.length < 16)) {
+      return res.status(400).json({ error: 'Invalid fingerprint hash format' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -47,15 +65,18 @@ export const signup = async (req, res) => {
       password: hashedPassword,
       role,
       phone,
+      fingerprintHash,
       ...(role === 'student' && { admNo, className, gender })
     });
 
     const token = generateToken(newUser);
     res.status(201).json({ user: newUser, token });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[signup]', err);
+    res.status(500).json({ error: err.message || 'Signup failed' });
   }
 };
+
 
 // @route   POST /api/auth/login
 export const login = async (req, res) => {

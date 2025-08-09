@@ -1,4 +1,29 @@
 import User from '../models/User.js'
+/**
+ * Register fingerprint hash for a student
+ * @route POST /api/users/students/:id/fingerprint
+ * @access Admin or Teacher
+ */
+export const registerFingerprint = async (req, res) => {
+  try {
+    const { fingerprintHash } = req.body;
+    const { id } = req.params;
+
+    if (!fingerprintHash || fingerprintHash.length < 16) {
+      return res.status(400).json({ error: 'Invalid fingerprint hash.' });
+    }
+
+    const student = await User.findByIdAndUpdate(id, { fingerprintHash }, { new: true });
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ error: 'Student not found or invalid role.' });
+    }
+
+    res.status(200).json({ message: 'Fingerprint registered successfully', student });
+  } catch (err) {
+    console.error('[registerFingerprint]', err);
+    res.status(500).json({ error: 'Failed to register fingerprint.' });
+  }
+};
 
 // @desc    Get logged-in user's profile
 // @route   GET /api/users/profile
@@ -34,6 +59,7 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ error: 'Server error' })
   }
 }
+
 
 // @desc    Get all users or filter by role (admin only)
 // @route   GET /api/users

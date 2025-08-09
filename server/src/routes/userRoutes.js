@@ -1,5 +1,6 @@
 import express from 'express'
 import {
+  registerFingerprint,
   getUserProfile,
   updateUser,
   getAllUsers,
@@ -8,6 +9,9 @@ import {
 import { protect, authorizeRoles } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
+
+// 👤 User  fingerprint registration
+router.post('/students/:id/fingerprint', protect, authorizeRoles('admin', 'teacher'), registerFingerprint);
 
 // 👤 Logged-in user views own profile
 router.get('/profile', protect, getUserProfile)
