@@ -306,9 +306,6 @@ export const markBiometricAttendance = async (req, res) => {
 
 
 // mark batch attendance
-/**
- * Mark batch attendance
- */
 export const markBatchAttendance = async (req, res) => {
   try {
     const { classId, date, records } = req.body;
