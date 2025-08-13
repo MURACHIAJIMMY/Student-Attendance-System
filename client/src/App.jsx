@@ -10,6 +10,9 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import StudentDashboard from "@/pages/StudentDashboard";
 import TeacherDashboard from "@/pages/TeacherDashboard";
 
+// Shared layout
+import Layout from "@/components/Layout";
+
 export default function App() {
   return (
     <Router>
@@ -19,7 +22,7 @@ export default function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes */}
+        {/* Protected Dashboard Redirect */}
         <Route
           path="/dashboard"
           element={
@@ -28,30 +31,42 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Admin Routes */}
         <Route
           path="/admin"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
+              <Layout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/student"
-          element={
-            <ProtectedRoute allowedRoles={["student"]}>
-              <StudentDashboard />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route index element={<AdminDashboard />} />
+        </Route>
+
+        {/* Teacher Routes */}
         <Route
           path="/teacher"
           element={
             <ProtectedRoute allowedRoles={["teacher"]}>
-              <TeacherDashboard />
+              <Layout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<TeacherDashboard />} />
+        </Route>
+
+        {/* Student Routes */}
+        <Route
+          path="/student"
+          element={
+            <ProtectedRoute allowedRoles={["student"]}>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<StudentDashboard />} />
+        </Route>
 
         {/* Fallback */}
         <Route path="/unauthorized" element={<div>Access Denied</div>} />
