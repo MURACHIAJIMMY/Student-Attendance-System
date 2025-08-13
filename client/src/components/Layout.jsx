@@ -29,17 +29,17 @@ export default function Layout() {
 
   const links = {
     admin: [
-      { label: "Dashboard", path: "/admin" },
+      { label: "Overview", path: "/admin" },
       { label: "Manage Users", path: "/admin/users" },
       { label: "Classes", path: "/admin/classes" },
     ],
     teacher: [
-      { label: "Dashboard", path: "/teacher" },
+      { label: "Overview", path: "/teacher" },
       { label: "Mark Attendance", path: "/teacher/attendance" },
       { label: "Class Trends", path: "/teacher/trends" },
     ],
     student: [
-      { label: "Dashboard", path: "/student" },
+      { label: "Overview", path: "/student" },
       { label: "My Attendance", path: "/student/attendance" },
       { label: "Summary", path: "/student/summary" },
     ],
