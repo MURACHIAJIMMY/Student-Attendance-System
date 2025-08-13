@@ -46,18 +46,18 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex bg-purple-100">
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-md p-4">
         <h2 className="text-lg font-bold mb-4">Welcome, {user.name}</h2>
-        <p className="text-sm text-gray-600 mb-6">Role: {user.role}</p>
+        <p className="text-sm text-white mb-6">Role: {user.role}</p>
 
         <nav className="space-y-2">
           {links[user.role]?.map((link) => (
             <button
               key={link.path}
               onClick={() => navigate(link.path)}
-              className="block w-full text-left px-3 py-2 rounded hover:bg-indigo-100 text-sm text-gray-700"
+              className="block w-full text-left px-3 py-2 rounded hover:bg-indigo-100 text-sm text-white"
             >
               {link.label}
             </button>
