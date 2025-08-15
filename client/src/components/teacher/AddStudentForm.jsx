@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { useClassContext } from "@/hooks/useClassActions";
+import { useState, useContext } from "react";
+import { ClassContext } from "@/context/ClassContext";
 import axios from "axios";
 
 export default function AddStudentForm() {
-  const { selectedClassId, students, setStudents } = useClassContext();
+  const { selectedClassId, students, setStudents } = useContext(ClassContext);
   const [name, setName] = useState("");
   const [admNo, setAdmNo] = useState("");
   const [loading, setLoading] = useState(false);

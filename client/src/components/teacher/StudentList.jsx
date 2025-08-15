@@ -1,7 +1,8 @@
-import  useClassContext  from "@/hooks/useClassActions";
+import { useContext } from "react";
+import { ClassContext } from "@/context/ClassContext";
 
 export default function StudentList() {
-  const { students, selectedClassId } = useClassContext();
+  const { students, selectedClassId } = useContext(ClassContext);
 
   if (!selectedClassId) return <p>Please select a class.</p>;
   if (students.length === 0) return <p>No students found for this class.</p>;
