@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ClassContext } from "./ClassContext";
-import { useClassActions } from "@/hooks/useClassActions";
+import  useClassActions  from "@/hooks/useClassActions";
 
 export function ClassProvider({ children }) {
   const [selectedClassId, setSelectedClassId] = useState(null);
