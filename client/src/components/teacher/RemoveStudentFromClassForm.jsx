@@ -1,18 +1,28 @@
-import { useClassContext } from "@/context/ClassProvider";
+import { useContext } from "react";
+import { ClassContext } from "@/context/ClassContext";
 
 export default function RemoveStudentFromClassForm() {
-  const { students, removeStudent } = useClassContext();
+  const { selectedClassId, students, setStudents } = useContext(ClassContext);
+
+  const handleRemoveStudent = (studentId) => {
+    if (!selectedClassId) return;
+
+    const updatedStudents = students.filter((s) => s._id !== studentId);
+    setStudents(updatedStudents);
+  };
 
   return (
     <div>
-      <h3 className="font-medium mb-2">Remove Student</h3>
-      <ul className="space-y-2">
+      <h2 className="text-lg font-semibold mb-2">Remove Student</h2>
+      <ul className="list-disc pl-5">
         {students.map((student) => (
-          <li key={student.id} className="flex justify-between items-center">
-            <span>{student.name}</span>
+          <li key={student._id} className="flex justify-between items-center mb-2">
+            <span>
+              {student.name} ({student.admNo})
+            </span>
             <button
-              onClick={() => removeStudent(student.id)}
-              className="text-red-600 hover:underline"
+              onClick={() => handleRemoveStudent(student._id)}
+              className="bg-red-600 text-white px-2 py-1 rounded text-sm"
             >
               Remove
             </button>
