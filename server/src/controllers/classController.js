@@ -129,20 +129,38 @@ export const getClassById = asyncHandler(async (req, res) => {
   res.json(classData)
 })
 
-// @desc    Get all classes (optional filters)
-// @route   GET /api/classes
-// @access  Admin or Teacher
+// // @desc    Get all classes (optional filters)
+// // @route   GET /api/classes
+// // @access  Admin or Teacher
+// export const getAllClasses = asyncHandler(async (req, res) => {
+//   const { name, teacher } = req.query
+
+//   const query = {
+//     ...(name && { name: { $regex: new RegExp(name, 'i') } }),
+//     ...(teacher && { teacher })
+//   }
+
+//   const classes = await Class.find(query)
+//     .populate('teacher', 'name email role')
+//     .populate('students', 'name admNo')
+
+//   res.json(classes)
+// })
+
 export const getAllClasses = asyncHandler(async (req, res) => {
-  const { name, teacher } = req.query
+  const { name } = req.query;
+
+  // Infer teacher ID if user is a teacher
+  const inferredTeacherId = req.user.role === 'teacher' ? req.user._id : req.query.teacher;
 
   const query = {
     ...(name && { name: { $regex: new RegExp(name, 'i') } }),
-    ...(teacher && { teacher })
-  }
+    ...(inferredTeacherId && { teacher: inferredTeacherId }),
+  };
 
   const classes = await Class.find(query)
     .populate('teacher', 'name email role')
-    .populate('students', 'name admNo')
+    .populate('students', 'name admNo');
 
-  res.json(classes)
-})
+  res.json(classes);
+});
