@@ -1,4 +1,4 @@
-import { useClassContext } from "@/hooks/useClassActions";
+import  useClassContext  from "@/hooks/useClassActions";
 
 export default function StudentList() {
   const { students, selectedClassId } = useClassContext();
