@@ -1,4 +1,4 @@
-import { useClassContext } from "@/context/ClassProvider";
+import { useClassContext } from "@/context/ClassContext";
 import { useState } from "react";
 
 export default function AddStudentsToClassForm() {
