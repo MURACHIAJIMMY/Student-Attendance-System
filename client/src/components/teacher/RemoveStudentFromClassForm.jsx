@@ -1,14 +1,29 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { ClassContext } from "@/context/ClassContext";
+import { removeStudentFromClass } from "@/api/classStudentApi";
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function RemoveStudentFromClassForm() {
   const { selectedClassId, students, setStudents } = useContext(ClassContext);
+  const { token } = useAuthContext();
+  const [removingId, setRemovingId] = useState(null);
 
-  const handleRemoveStudent = (studentId) => {
-    if (!selectedClassId) return;
+  const handleRemoveStudent = async (studentId) => {
+    if (!selectedClassId || !studentId) return;
 
-    const updatedStudents = students.filter((s) => s._id !== studentId);
-    setStudents(updatedStudents);
+    try {
+      setRemovingId(studentId);
+
+      await removeStudentFromClass(selectedClassId, studentId, token);
+
+      // Update local state
+      const updatedStudents = students.filter((s) => s._id !== studentId);
+      setStudents(updatedStudents);
+    } catch (error) {
+      console.error("Failed to remove student:", error);
+    } finally {
+      setRemovingId(null);
+    }
   };
 
   return (
@@ -22,9 +37,10 @@ export default function RemoveStudentFromClassForm() {
             </span>
             <button
               onClick={() => handleRemoveStudent(student._id)}
+              disabled={removingId === student._id}
               className="bg-red-600 text-white px-2 py-1 rounded text-sm"
             >
-              Remove
+              {removingId === student._id ? "Removing..." : "Remove"}
             </button>
           </li>
         ))}

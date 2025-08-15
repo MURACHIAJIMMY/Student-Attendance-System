@@ -60,7 +60,7 @@ app.use('/api/biometric', biometricRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/classes', classRoutes);
-app.use('/api/classes', classStudentRoutes);
+app.use('/api/classes/students', classStudentRoutes);
 
 // Root route
 app.get('/', (req, res) => {

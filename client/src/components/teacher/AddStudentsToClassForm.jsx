@@ -1,14 +1,34 @@
-import { useClassContext } from "@/context/ClassContext";
 import { useState } from "react";
+import { useClassContext } from "@/context/ClassContext";
+import { addStudentsToClass } from "@/api/classStudentApi";
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function AddStudentsToClassForm() {
-  const { addStudent } = useClassContext();
+  const { selectedClass, refreshStudents } = useClassContext();
+  const { token } = useAuthContext();
   const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleAdd = () => {
-    if (name.trim()) {
-      addStudent({ id: Date.now(), name });
+  const handleAdd = async () => {
+    if (!name.trim() || !selectedClass?.id) return;
+
+    try {
+      setLoading(true);
+
+      // Simulate student ID creation (replace with real logic if needed)
+      const newStudent = { id: Date.now(), name };
+
+      // Call backend to add student
+      await addStudentsToClass(selectedClass.id, [newStudent.id], token);
+
+      // Optionally refresh student list
+      refreshStudents();
+
       setName("");
+    } catch (error) {
+      console.error("Failed to add student:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -23,8 +43,12 @@ export default function AddStudentsToClassForm() {
           placeholder="Student name"
           className="border px-2 py-1 rounded"
         />
-        <button onClick={handleAdd} className="bg-blue-600 text-white px-3 py-1 rounded">
-          Add
+        <button
+          onClick={handleAdd}
+          disabled={loading}
+          className="bg-blue-600 text-white px-3 py-1 rounded"
+        >
+          {loading ? "Adding..." : "Add"}
         </button>
       </div>
     </div>

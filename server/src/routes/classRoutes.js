@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  getStudentsByClass,
   createClass,
   updateClass,
   deleteClass,
@@ -10,14 +9,6 @@ import {
 import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
-// Get students by class ID or name
-router.get(
-  "/:idOrName/students",
-  protect,
-  authorizeRoles("teacher"),
-  getStudentsByClass
-);
 
 // Create a class (admin or teacher)
 router.post("/", protect, authorizeRoles("admin", "teacher"), createClass);

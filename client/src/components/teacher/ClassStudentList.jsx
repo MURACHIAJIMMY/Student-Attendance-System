@@ -1,19 +1,24 @@
 import { useState } from "react";
-import axios from "axios";
 import { useTeacher } from "@/context/useTeacher";
+import { listStudentsInClass } from "@/api/classStudentApi";
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function ClassStudentList() {
   const [classId, setClassId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { students, setStudents } = useTeacher();
+  const { token } = useAuthContext();
 
   const fetchStudents = async () => {
+    if (!classId.trim()) return;
+
     setLoading(true);
     setError("");
+
     try {
-      const res = await axios.get(`/api/classes/${classId}/students`);
-      setStudents(res.data); // ✅ Share with context
+      const res = await listStudentsInClass(classId, token);
+      setStudents(res.data);
     } catch (err) {
       setError(
         err?.response?.data?.message || err.message || "Failed to fetch students."
@@ -30,7 +35,7 @@ export default function ClassStudentList() {
       <div className="flex gap-2 mb-4">
         <input
           type="text"
-          placeholder="Enter class ID or name"
+          placeholder="Enter class ID"
           value={classId}
           onChange={(e) => setClassId(e.target.value)}
           className="border px-3 py-2 rounded w-full"
