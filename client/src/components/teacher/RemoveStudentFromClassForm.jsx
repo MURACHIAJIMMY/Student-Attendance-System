@@ -1,11 +1,11 @@
 import { useContext, useState } from "react";
 import { ClassContext } from "@/context/ClassContext";
 import { removeStudentFromClass } from "@/api/classStudentApi";
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext"; // ✅ Corrected import
 
 export default function RemoveStudentFromClassForm() {
   const { selectedClassId, students, setStudents } = useContext(ClassContext);
-  const { token } = useAuthContext();
+  const { token } = useAuth(); // ✅ Matches your context hook
   const [removingId, setRemovingId] = useState(null);
 
   const handleRemoveStudent = async (studentId) => {
@@ -13,7 +13,6 @@ export default function RemoveStudentFromClassForm() {
 
     try {
       setRemovingId(studentId);
-
       await removeStudentFromClass(selectedClassId, studentId, token);
 
       // Update local state
