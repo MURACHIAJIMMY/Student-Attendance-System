@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useClassContext } from "@/context/ClassContext";
 import { addStudentsToClass } from "@/api/classStudentApi";
-import { useAuthContext } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext"; // ✅ Fixed import
 
 export default function AddStudentsToClassForm() {
   const { selectedClass, refreshStudents } = useClassContext();
-  const { token } = useAuthContext();
+  const { token } = useAuth(); // ✅ Updated hook usage
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
