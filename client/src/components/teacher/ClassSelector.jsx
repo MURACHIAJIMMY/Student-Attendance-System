@@ -1,40 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext'; // ✅ Corrected import
+import React, { useContext } from "react";
+import { ClassContext } from "@/context/ClassContext";
 
-export default function ClassSelector({ onSelect }) {
-  const { token } = useAuth(); // ✅ Matches your context export
-  const [classes, setClasses] = useState([]);
-  const [selectedClass, setSelectedClass] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    async function fetchClasses() {
-      try {
-        const res = await fetch('/api/classes', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) throw new Error('Failed to fetch classes');
-        const data = await res.json();
-        setClasses(data);
-      } catch (err) {
-        console.error('Error fetching classes:', err);
-        setError('Could not load classes.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchClasses();
-  }, [token]);
+export default function ClassSelector() {
+  const {
+    classes,
+    selectedClassId,
+    setSelectedClassId,
+  } = useContext(ClassContext);
 
   const handleChange = (e) => {
-    const classId = e.target.value;
-    setSelectedClass(classId);
-    if (onSelect) onSelect(classId);
+    setSelectedClassId(e.target.value);
   };
 
   return (
@@ -44,10 +19,10 @@ export default function ClassSelector({ onSelect }) {
       </label>
       <select
         id="class"
-        value={selectedClass}
+        value={selectedClassId || ""}
         onChange={handleChange}
         className="border rounded px-3 py-2 w-full"
-        disabled={loading || error}
+        disabled={classes.length === 0}
       >
         <option value="">-- Choose a class --</option>
         {classes.map((cls) => (
@@ -56,8 +31,9 @@ export default function ClassSelector({ onSelect }) {
           </option>
         ))}
       </select>
-      {loading && <p className="text-sm text-gray-500 mt-1">Loading classes...</p>}
-      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+      {classes.length === 0 && (
+        <p className="text-sm text-gray-500 mt-1">Loading classes...</p>
+      )}
     </div>
   );
 }
