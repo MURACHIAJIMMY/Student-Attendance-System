@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useAuthContext } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext'; // ✅ Corrected import
 
 export default function ClassSelector({ onSelect }) {
-  const { token } = useAuthContext();
+  const { token } = useAuth(); // ✅ Matches your context export
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [loading, setLoading] = useState(true);
