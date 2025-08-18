@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import api from "@/lib/api";
+import { useAuth } from "@/context/AuthContext"; // ✅ Context import
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setToken } = useAuth(); // ✅ Sync token with context
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
 
@@ -24,6 +26,7 @@ export default function Login() {
 
       localStorage.setItem("token", user.token);
       localStorage.setItem("user", JSON.stringify(user));
+      setToken(user.token); // ✅ Update context
 
       toast.success("Welcome back!");
 
