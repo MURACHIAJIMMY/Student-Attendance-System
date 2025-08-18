@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { ClassContext } from "./ClassContext";
 import useClassActions from "@/hooks/useClassActions";
-import { useAuth } from "@/context/AuthContext"; // Adjust path if needed
+import { useAuth } from "@/context/AuthContext";
 
 export function ClassProvider({ children }) {
   const [classes, setClasses] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState(null);
   const [students, setStudents] = useState([]);
 
-  const { token } = useAuth(); // 🔐 Auth token for API calls
+  const { token } = useAuth();
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const {
     fetchStudents,
@@ -20,7 +21,7 @@ export function ClassProvider({ children }) {
   useEffect(() => {
     async function fetchClasses() {
       try {
-        const res = await fetch("/api/classes", {
+        const res = await fetch(`${BASE_URL}/classes`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -35,7 +36,6 @@ export function ClassProvider({ children }) {
         const data = await res.json();
         setClasses(data);
 
-        // ✅ Auto-select first class if none selected
         if (!selectedClassId && data.length > 0) {
           setSelectedClassId(data[0]._id);
         }
@@ -44,8 +44,10 @@ export function ClassProvider({ children }) {
       }
     }
 
-    fetchClasses();
-  }, [token]);
+    if (token) {
+      fetchClasses();
+    }
+  }, [token, BASE_URL, selectedClassId]); // ✅ ESLint-safe
 
   // 👥 Fetch students when selected class changes
   useEffect(() => {
@@ -61,7 +63,7 @@ export function ClassProvider({ children }) {
     if (selectedClassId) {
       loadStudents();
     }
-  }, [selectedClassId]);
+  }, [selectedClassId, fetchStudents]); // ✅ ESLint-safe
 
   const addStudent = async (studentIdentifier) => {
     try {
