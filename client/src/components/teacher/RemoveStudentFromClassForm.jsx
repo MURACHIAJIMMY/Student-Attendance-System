@@ -8,12 +8,12 @@ export default function RemoveStudentFromClassForm() {
   const { token } = useAuth(); // ✅ Matches your context hook
   const [removingId, setRemovingId] = useState(null);
 
-  const handleRemoveStudent = async (studentId) => {
-    if (!selectedClassId || !studentId) return;
+  const handleRemoveStudent = async (studentId, admNo) => {
+    if (!selectedClassId || !studentId || !admNo) return;
 
     try {
       setRemovingId(studentId);
-      await removeStudentFromClass(selectedClassId, studentId, token);
+      await removeStudentFromClass(selectedClassId, studentId, admNo, token);
 
       // Update local state
       const updatedStudents = students.filter((s) => s._id !== studentId);
@@ -35,7 +35,7 @@ export default function RemoveStudentFromClassForm() {
               {student.name} ({student.admNo})
             </span>
             <button
-              onClick={() => handleRemoveStudent(student._id)}
+              onClick={() => handleRemoveStudent(student._id, student.admNo)}
               disabled={removingId === student._id}
               className="bg-red-600 text-white px-2 py-1 rounded text-sm"
             >

@@ -7,24 +7,27 @@ export default function AddStudentsToClassForm() {
   const { selectedClass, refreshStudents } = useClassContext();
   const { token } = useAuth(); // ✅ Updated hook usage
   const [name, setName] = useState("");
+  const [admNo, setAdmNo] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleAdd = async () => {
-    if (!name.trim() || !selectedClass?.id) return;
+    if (!name.trim() || !admNo.trim() || !selectedClass?.id) return;
 
     try {
       setLoading(true);
 
-      // Simulate student ID creation (replace with real logic if needed)
-      const newStudent = { id: Date.now(), name };
+      const newStudent = {
+        id: Date.now().toString(), // Simulated ID
+        name,
+        admNo,
+      };
 
-      // Call backend to add student
-      await addStudentsToClass(selectedClass.id, [newStudent.id], token);
+      // Backend expects array of student objects
+      await addStudentsToClass(selectedClass.id, [newStudent], token);
 
-      // Optionally refresh student list
       refreshStudents();
-
       setName("");
+      setAdmNo("");
     } catch (error) {
       console.error("Failed to add student:", error);
     } finally {
@@ -35,12 +38,19 @@ export default function AddStudentsToClassForm() {
   return (
     <div>
       <h3 className="font-medium mb-2">Add Student</h3>
-      <div className="flex space-x-2">
+      <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Student name"
+          className="border px-2 py-1 rounded"
+        />
+        <input
+          type="text"
+          value={admNo}
+          onChange={(e) => setAdmNo(e.target.value)}
+          placeholder="Admission number"
           className="border px-2 py-1 rounded"
         />
         <button

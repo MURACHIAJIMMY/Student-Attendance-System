@@ -12,8 +12,7 @@ import userRoutes from './routes/userRoutes.js';
 import biometricRoutes from './routes/biometricRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
 import reminderRoutes from './routes/reminderRoutes.js';
-import classRoutes from './routes/classRoutes.js';
-import classStudentRoutes from './routes/classStudentRoutes.js';
+import classRoutes from './routes/classRoutes.js'; // ✅ includes nested student routes
 import { sendAttendanceReminders } from './cronJobs/attendanceReminder.js';
 
 dotenv.config();
@@ -59,8 +58,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/biometric', biometricRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/reminders', reminderRoutes);
-app.use('/api/classes', classRoutes);
-app.use('/api/classes/students', classStudentRoutes);
+app.use('/api/classes', classRoutes); // ✅ handles /:classId/students too
 
 // Root route
 app.get('/', (req, res) => {

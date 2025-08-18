@@ -7,8 +7,12 @@ import {
   getAllClasses,
 } from "../controllers/classController.js";
 import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
+import classStudentRoutes from "./classStudentRoutes.js"; // 👈 import nested routes
 
 const router = express.Router();
+
+// Mount nested student routes
+router.use("/:classId/students", classStudentRoutes); // 👈 nested route
 
 // Create a class (admin or teacher)
 router.post("/", protect, authorizeRoles("admin", "teacher"), createClass);
