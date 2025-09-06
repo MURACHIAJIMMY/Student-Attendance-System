@@ -20,9 +20,12 @@ export function TeacherProvider({ children }) {
       setStudentError("");
 
       try {
-        const res = await axios.get(`/api/classes/${activeClass._id}/students`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          `/api/classes/${activeClass._id}/students`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setStudents(res.data);
       } catch (err) {
         setStudentError(
