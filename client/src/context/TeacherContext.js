@@ -40,18 +40,18 @@ export function TeacherProvider({ children }) {
     fetchStudents();
   }, [activeClass?._id, token]);
 
-  return (
+  return(
     <TeacherContext.Provider
-      value={{
-        activeClass,
-        setActiveClass,
-        students,
-        setStudents,
-        loadingStudents,
-        studentError,
-      }}
+    value={{
+      activeClass,
+      setActiveClass,
+      students,
+      setStudents,
+      loadingStudents,
+      studentError,
+    }}
     >
-      {children}
-    </TeacherContext.Provider>
-  );
-}
+        {children}
+      </TeacherContext.Provider>
+    );
+  }
