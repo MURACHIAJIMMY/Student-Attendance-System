@@ -15,10 +15,12 @@ export default function useClassActions(selectedClassId) {
       },
     });
 
+    const contentType = res.headers.get("content-type");
     let data;
-    try {
+
+    if (contentType && contentType.includes("application/json")) {
       data = await res.json();
-    } catch {
+    } else {
       const text = await res.text();
       throw new Error(text || "Failed to fetch students");
     }
@@ -46,10 +48,12 @@ export default function useClassActions(selectedClassId) {
       body: JSON.stringify({ students: [studentIdentifier] }),
     });
 
+    const contentType = res.headers.get("content-type");
     let data;
-    try {
+
+    if (contentType && contentType.includes("application/json")) {
       data = await res.json();
-    } catch {
+    } else {
       const text = await res.text();
       throw new Error(text || "Failed to add student");
     }
@@ -79,10 +83,12 @@ export default function useClassActions(selectedClassId) {
       }
     );
 
+    const contentType = res.headers.get("content-type");
     let data;
-    try {
+
+    if (contentType && contentType.includes("application/json")) {
       data = await res.json();
-    } catch {
+    } else {
       const text = await res.text();
       throw new Error(text || "Failed to remove student");
     }
