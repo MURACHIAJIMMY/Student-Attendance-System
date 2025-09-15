@@ -11,8 +11,9 @@ import classStudentRoutes from "./classStudentRoutes.js"; // 👈 import nested 
 
 const router = express.Router();
 
-// Mount nested student routes
-router.use("/:classId/students", classStudentRoutes); // 👈 nested route
+
+// ✅ Mount student routes under /classes/:classId/students
+router.use('/:classId/students', classStudentRoutes);
 
 // Create a class (admin or teacher)
 router.post("/", protect, authorizeRoles("admin", "teacher"), createClass);
