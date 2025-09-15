@@ -15,12 +15,19 @@ export default function useClassActions(selectedClassId) {
       },
     });
 
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || "Failed to fetch students");
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      const text = await res.text();
+      throw new Error(text || "Failed to fetch students");
     }
 
-    return await res.json();
+    if (!res.ok) {
+      throw new Error(data?.message || "Failed to fetch students");
+    }
+
+    return data;
   }
 
   /**
@@ -39,12 +46,19 @@ export default function useClassActions(selectedClassId) {
       body: JSON.stringify({ students: [studentIdentifier] }),
     });
 
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || "Failed to add student");
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      const text = await res.text();
+      throw new Error(text || "Failed to add student");
     }
 
-    return await res.json(); // { message, added, total }
+    if (!res.ok) {
+      throw new Error(data?.message || "Failed to add student");
+    }
+
+    return data; // { message, added, total }
   }
 
   /**
@@ -65,12 +79,19 @@ export default function useClassActions(selectedClassId) {
       }
     );
 
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.message || "Failed to remove student");
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      const text = await res.text();
+      throw new Error(text || "Failed to remove student");
     }
 
-    return await res.json(); // { message, removed, remaining }
+    if (!res.ok) {
+      throw new Error(data?.message || "Failed to remove student");
+    }
+
+    return data; // { message, removed, remaining }
   }
 
   return {
