@@ -1,57 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTeacher } from "@/context/useTeacher";
 import { listStudentsInClass } from "@/api/classStudentApi";
 import { useAuthContext } from "@/context/AuthContext";
+import { useContext } from "react";
+import { ClassContext } from "@/context/ClassContext";
 
 export default function ClassStudentList() {
-  const [classId, setClassId] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const { students, setStudents } = useTeacher();
   const { token } = useAuthContext();
+  const { selectedClassId } = useContext(ClassContext);
 
-  const fetchStudents = async () => {
-    if (!classId.trim()) return;
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-    setLoading(true);
-    setError("");
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!selectedClassId) return;
 
-    try {
-      const res = await listStudentsInClass(classId, token);
-      setStudents(res.data);
-    } catch (err) {
-      setError(
-        err?.response?.data?.message || err.message || "Failed to fetch students."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true);
+      setError("");
+
+      try {
+        const res = await listStudentsInClass(selectedClassId, token);
+        setStudents(res.data);
+      } catch (err) {
+        setError(
+          err?.response?.data?.message || err.message || "Failed to fetch students."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStudents();
+  }, [selectedClassId, token, setStudents]);
 
   return (
     <div className="p-4 bg-white rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">View Students by Class</h2>
-
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Enter class ID"
-          value={classId}
-          onChange={(e) => setClassId(e.target.value)}
-          className="border px-3 py-2 rounded w-full"
-        />
-        <button
-          onClick={fetchStudents}
-          className="bg-indigo-600 text-white px-4 py-2 rounded"
-        >
-          Fetch
-        </button>
-      </div>
+      <h2 className="text-xl font-semibold mb-4">Students in Selected Class</h2>
 
       {loading && <p>Loading students...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {students.length > 0 && (
+      {students.length > 0 ? (
         <table className="w-full border mt-4">
           <thead>
             <tr className="bg-gray-100">
@@ -74,6 +65,8 @@ export default function ClassStudentList() {
             ))}
           </tbody>
         </table>
+      ) : (
+        <p className="text-gray-500">No students found for this class.</p>
       )}
     </div>
   );
