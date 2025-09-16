@@ -56,12 +56,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
-import { useClass } from "./ClassContext"; // ✅ sync source
+import { useClassContext } from "./ClassContext"; // ✅ fixed import
 import { TeacherContext } from "./TeacherContext";
 
 export function TeacherProvider({ children }) {
   const { token } = useAuth();
-  const { selectedClassId, classes } = useClass(); // ✅ get selection and class list
+  const { selectedClassId, classes } = useClassContext(); // ✅ fixed usage
 
   const [activeClass, setActiveClass] = useState(null);
   const [students, setStudents] = useState([]);
